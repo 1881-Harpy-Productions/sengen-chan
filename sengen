@@ -1,0 +1,55 @@
+#!/bin/sh
+
+set -x
+ports="0"
+workfolder=$HOME/Git/personal/sengen-chan/
+
+### gets a list of all packages manualy installed
+get-prime-list()
+    {
+        case $workfolder in
+            "") workfolder=$HOME
+        esac
+        echo $workfolder
+        echo $(pkg prime-list) | tr ' ' '\n'  > /tmp/prime-list.tmp
+        touch $workfolder/prime-list
+        while read package
+        do
+            echo $(pkg info -o "$package") | cut -f2 -w >> $workfolder/prime-list
+        done < /tmp/prime-list.tmp
+}
+
+### installs all packages from the prime-list
+install-prime-list()
+    {
+        while read package
+        do
+            pkg install -yn "$package"
+        done < prime-list
+}
+
+#### keep asking user for yes or no
+ask-user()
+    {
+        while true; do
+            read -p "$1" yn
+            case $yn in
+                [Yy]* ) return 1;;
+                [Nn]* ) return 0;;
+                * ) echo "Please answer yes or no.";;
+            esac
+        done
+}
+
+### ask where to save the output of this file
+read -p "Path to work folder, where it will save the files, or where the saved files are located: " workfolder
+if [ -e $workfolder ]
+then
+    echo "folder exists"
+else
+    echo "folder does not exist"
+fi
+### install from the ports
+ports=$(ask-user "install packages from ports? y/N: ")
+get-prime-list
+
