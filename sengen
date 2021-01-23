@@ -1,6 +1,6 @@
 #!/bin/sh
 
-set -x
+#set -x
 ports="0"
 workfolder=$HOME/Git/personal/sengen-chan/
 
@@ -42,14 +42,18 @@ ask-user()
 }
 
 ### ask where to save the output of this file
-read -p "Path to work folder, where it will save the files, or where the saved files are located: " workfolder
+read -p "Path to work folder: " workfolder
 if [ -e $workfolder ]
 then
-    echo "folder exists"
+    ;;
 else
     echo "folder does not exist"
+    exit 1
 fi
 ### install from the ports
-ports=$(ask-user "install packages from ports? y/N: ")
-get-prime-list
+#ports=$(ask-user "install packages from ports? y/N: ")
 
+case $1 in
+    "backup")	;;
+get-prime-list
+install-prime-list
