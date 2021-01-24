@@ -1,0 +1,49 @@
+#!/bin/sh
+
+#set -x
+ports="0"
+workfolder=$HOME/Git/personal/sengen-chan/
+
+read -p "Path to work folder: " workfolder
+case $workfolder in
+    "") workfolder=$HOME
+esac
+
+
+
+#### asking to restore or create backup
+while true; do
+    read -p "Restore or Backup; R/B" rb
+    case $rb in
+        [Rr]* ) restore=1; break ;;
+        [Bb]* )
+            echo $(pkg prime-list) | tr ' ' '\n' > /tmp/prime-list
+            touch prime-list
+            while read package
+            do
+                echo $(pkg info -o $package) | cut -f2 -w >> $workfolder/prime-list
+            done < /tmp/prime-list
+            exit 0 ;;
+        * ) echo "Please answer [R]estore or [B]backup.";;
+    esac
+done
+
+
+#### restoring backup
+read -p "install from ports Y/N" ports
+case $ports in
+    [Yy]*)
+        while read package
+        do
+		cd /usr/ports/$package
+		make config
+		make install
+	done < prime-list
+	;;
+    [Nn]*)
+        while read package
+        do
+            pkg install -y "$package"
+        done < prime-list
+        ;;
+esac
